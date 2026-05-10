@@ -1,0 +1,16 @@
+{% extends 'main_app/base.html' %}
+
+{% block content %}
+<h1>My Topics</h1>
+{% if topics %}
+  <ul>
+    {% for topic in topics %}
+      <li>
+        <a href="{% url 'topic_detail' topic.pk %}">{{ topic.name }}</a> — {{ topic.get_status_display }}
+      </li>
+    {% endfor %}
+  </ul>
+{% else %}
+  <p>No topics yet. <a href="{% url 'topic_create' %}">Add one!</a></p>
+{% endif %}
+{% endblock %}

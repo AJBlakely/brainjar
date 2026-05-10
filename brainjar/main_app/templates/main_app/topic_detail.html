@@ -1,0 +1,14 @@
+{% extends 'main_app/base.html' %}
+
+{% block content %}
+<h1>{{ topic.name }}</h1>
+<p><strong>Status:</strong> {{ topic.get_status_display }}</p>
+<p>{{ topic.description }}</p>
+<a href="{% url 'topic_edit' topic.pk %}">Edit</a> |
+<a href="{% url 'home' %}">Back to My Topics</a>
+
+<form method="post" action="{% url 'topic_delete' topic.pk %}" style="display:inline;">
+  {% csrf_token %}
+  <button type="submit" onclick="return confirm('Delete this topic?')">Delete</button>
+</form>
+{% endblock %}
