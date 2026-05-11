@@ -1,0 +1,37 @@
+{% extends 'main_app/base.html' %}
+
+{% block content %}
+<div class="container">
+  <div style="margin-bottom:1.5rem;">
+    <a href="{% url 'tag_index' %}" style="color:#7c3aed;font-size:0.875rem;font-weight:600;text-decoration:none;">← All Tags</a>
+  </div>
+
+  <div class="action-row" style="margin-bottom:1.5rem;">
+    <span class="tag-chip" style="font-size:1rem;padding:0.4rem 1rem;">{{ tag.name }}</span>
+    <span style="color:#94a3b8;font-size:0.875rem;">{{ topics.count }} topic{{ topics.count|pluralize }}</span>
+  </div>
+
+  {% if topics %}
+    <ul class="topic-list">
+      {% for topic in topics %}
+        <li class="topic-item">
+          <a href="{% url 'topic_detail' topic.pk %}">{{ topic.name }}</a>
+          <div style="display:flex;align-items:center;gap:0.75rem;">
+            <div class="tag-cloud" style="margin:0;">
+              {% for t in topic.tags.all %}
+                <a href="{% url 'tag_detail' t.pk %}" class="tag-chip" style="font-size:0.75rem;padding:0.2rem 0.6rem;">{{ t.name }}</a>
+              {% endfor %}
+            </div>
+            <span class="badge badge-{{ topic.status }}">{{ topic.get_status_display }}</span>
+          </div>
+        </li>
+      {% endfor %}
+    </ul>
+  {% else %}
+    <div class="empty-state">
+      <p>No topics have this tag yet.</p>
+      <a href="{% url 'topic_index' %}" class="btn btn-primary">Go to My Topics</a>
+    </div>
+  {% endif %}
+</div>
+{% endblock %}

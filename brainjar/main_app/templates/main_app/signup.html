@@ -1,11 +1,17 @@
 {% extends 'main_app/base.html' %}
 
 {% block content %}
-<h1>Sign Up</h1>
-<form method="post">
-  {% csrf_token %}
-  {{ form.as_p }}
-  <button type="submit">Create Account</button>
-</form>
-<p>Already have an account? <a href="{% url 'login' %}">Log in</a></p>
+<div class="auth-wrapper">
+  <div class="card">
+    <h1>Sign Up</h1>
+    <form method="post">
+      {% csrf_token %}
+      {{ form.as_p }}
+      <button type="submit" class="btn btn-primary" style="width:100%;margin-top:0.5rem;">Create Account</button>
+    </form>
+    <p style="margin-top:1.25rem;text-align:center;color:#64748b;font-size:0.9rem;">
+      Already have an account? <a href="{% url 'login' %}" style="color:#4f46e5;font-weight:600;">Log in</a>
+    </p>
+  </div>
+</div>
 {% endblock %}

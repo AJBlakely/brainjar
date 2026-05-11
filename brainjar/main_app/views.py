@@ -1,8 +1,9 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth import login, logout, authenticate
 from django.contrib.auth.decorators import login_required
-from .forms import SignupForm, TopicForm
-from .models import Topic
+from django.db.models import Count
+from .forms import SignupForm, TopicForm, NoteForm
+from .models import Topic, Note, Tag
 
 
 def home(request):
@@ -11,7 +12,7 @@ def home(request):
 
 @login_required
 def topic_index(request):
-    topics = request.user.topics.all()
+    topics = request.user.topics.prefetch_related('tags').all()
     return render(request, 'main_app/topic_index.html', {'topics': topics})
 
 
@@ -61,7 +62,8 @@ def topic_create(request):
 @login_required
 def topic_detail(request, pk):
     topic = get_object_or_404(Topic, pk=pk, user=request.user)
-    return render(request, 'main_app/topic_detail.html', {'topic': topic})
+    note_form = NoteForm()
+    return render(request, 'main_app/topic_detail.html', {'topic': topic, 'note_form': note_form})
 
 
 @login_required
@@ -84,3 +86,72 @@ def topic_delete(request, pk):
         topic.delete()
         return redirect('topic_index')
     return render(request, 'main_app/topic_confirm_delete.html', {'topic': topic})
+
+
+@login_required
+def topic_add_tag(request, topic_pk):
+    topic = get_object_or_404(Topic, pk=topic_pk, user=request.user)
+    if request.method == 'POST':
+        name = request.POST.get('name', '').strip().lower()
+        if name:
+            tag, _ = Tag.objects.get_or_create(user=request.user, name=name)
+            topic.tags.add(tag)
+    return redirect('topic_detail', pk=topic_pk)
+
+
+@login_required
+def topic_remove_tag(request, topic_pk, tag_pk):
+    topic = get_object_or_404(Topic, pk=topic_pk, user=request.user)
+    tag = get_object_or_404(Tag, pk=tag_pk, user=request.user)
+    if request.method == 'POST':
+        topic.tags.remove(tag)
+    return redirect('topic_detail', pk=topic_pk)
+
+
+@login_required
+def tag_index(request):
+    tags = request.user.tags.annotate(topic_count=Count('topics')).order_by('name')
+    return render(request, 'main_app/tag_index.html', {'tags': tags})
+
+
+@login_required
+def tag_detail(request, pk):
+    tag = get_object_or_404(Tag, pk=pk, user=request.user)
+    topics = tag.topics.filter(user=request.user).prefetch_related('tags')
+    return render(request, 'main_app/tag_detail.html', {'tag': tag, 'topics': topics})
+
+
+@login_required
+def note_add(request, topic_pk):
+    topic = get_object_or_404(Topic, pk=topic_pk, user=request.user)
+    if request.method == 'POST':
+        form = NoteForm(request.POST)
+        if form.is_valid():
+            note = form.save(commit=False)
+            note.topic = topic
+            note.save()
+            return redirect('topic_detail', pk=topic_pk)
+        return render(request, 'main_app/topic_detail.html', {'topic': topic, 'note_form': form})
+    return redirect('topic_detail', pk=topic_pk)
+
+
+@login_required
+def note_edit(request, note_pk):
+    note = get_object_or_404(Note, pk=note_pk, topic__user=request.user)
+    if request.method == 'POST':
+        form = NoteForm(request.POST, instance=note)
+        if form.is_valid():
+            form.save()
+            return redirect('topic_detail', pk=note.topic.pk)
+    else:
+        form = NoteForm(instance=note)
+    return render(request, 'main_app/note_edit.html', {'form': form, 'note': note})
+
+
+@login_required
+def note_delete(request, note_pk):
+    note = get_object_or_404(Note, pk=note_pk, topic__user=request.user)
+    topic_pk = note.topic.pk
+    if request.method == 'POST':
+        note.delete()
+    return redirect('topic_detail', pk=topic_pk)

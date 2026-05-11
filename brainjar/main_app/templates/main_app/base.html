@@ -1,23 +1,26 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>BrainJar</title>
+  <link rel="stylesheet" href="{% static 'css/style.css' %}">
 </head>
 <body>
   <nav>
-    <a href="{% url 'home' %}">BrainJar</a>
+    <a href="{% url 'home' %}" class="nav-brand">BrainJar</a>
     {% if user.is_authenticated %}
-      | <a href="{% url 'topic_index' %}">My Topics</a>
-      | <a href="{% url 'topic_create' %}">+ New Topic</a>
-      | <span>{{ user.username }}</span>
-      | <a href="{% url 'logout' %}">Logout</a>
+      <a href="{% url 'topic_index' %}">My Topics</a>
+      <a href="{% url 'tag_index' %}">Tags</a>
+      <a href="{% url 'topic_create' %}">+ New Topic</a>
+      <span class="nav-user">{{ user.username }}</span>
+      <a href="{% url 'logout' %}">Logout</a>
     {% else %}
-      | <a href="{% url 'login' %}">Login</a>
-      | <a href="{% url 'signup' %}">Sign Up</a>
+      <a href="{% url 'login' %}">Login</a>
+      <a href="{% url 'signup' %}">Sign Up</a>
     {% endif %}
   </nav>
-  <hr>
   {% block content %}{% endblock %}
 </body>
 </html>

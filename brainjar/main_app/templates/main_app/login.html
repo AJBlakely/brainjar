@@ -1,13 +1,25 @@
 {% extends 'main_app/base.html' %}
 
 {% block content %}
-<h1>Log In</h1>
-{% if error %}<p style="color:red;">{{ error }}</p>{% endif %}
-<form method="post">
-  {% csrf_token %}
-  <label>Username <input type="text" name="username" required></label><br>
-  <label>Password <input type="password" name="password" required></label><br>
-  <button type="submit">Log In</button>
-</form>
-<p>Don't have an account? <a href="{% url 'signup' %}">Sign up</a></p>
+<div class="auth-wrapper">
+  <div class="card">
+    <h1>Log In</h1>
+    {% if error %}<div class="error-msg">{{ error }}</div>{% endif %}
+    <form method="post">
+      {% csrf_token %}
+      <div class="form-group">
+        <label for="username">Username</label>
+        <input type="text" id="username" name="username" required autofocus>
+      </div>
+      <div class="form-group">
+        <label for="password">Password</label>
+        <input type="password" id="password" name="password" required>
+      </div>
+      <button type="submit" class="btn btn-primary" style="width:100%;margin-top:0.5rem;">Log In</button>
+    </form>
+    <p style="margin-top:1.25rem;text-align:center;color:#64748b;font-size:0.9rem;">
+      Don't have an account? <a href="{% url 'signup' %}" style="color:#4f46e5;font-weight:600;">Sign up</a>
+    </p>
+  </div>
+</div>
 {% endblock %}

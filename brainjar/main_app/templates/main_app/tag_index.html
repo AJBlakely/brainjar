@@ -1,0 +1,23 @@
+{% extends 'main_app/base.html' %}
+
+{% block content %}
+<div class="container">
+  <h1 class="page-title">My Tags</h1>
+
+  {% if tags %}
+    <ul class="tag-list">
+      {% for tag in tags %}
+        <li class="tag-item">
+          <a href="{% url 'tag_detail' tag.pk %}">{{ tag.name }}</a>
+          <span class="tag-count">{{ tag.topic_count }} topic{{ tag.topic_count|pluralize }}</span>
+        </li>
+      {% endfor %}
+    </ul>
+  {% else %}
+    <div class="empty-state">
+      <p>No tags yet — add one from a topic's detail page.</p>
+      <a href="{% url 'topic_index' %}" class="btn btn-primary">Go to My Topics</a>
+    </div>
+  {% endif %}
+</div>
+{% endblock %}

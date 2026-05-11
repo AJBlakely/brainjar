@@ -1,14 +1,91 @@
 {% extends 'main_app/base.html' %}
 
 {% block content %}
-<h1>{{ topic.name }}</h1>
-<p><strong>Status:</strong> {{ topic.get_status_display }}</p>
-<p>{{ topic.description }}</p>
-<a href="{% url 'topic_edit' topic.pk %}">Edit</a> |
-<a href="{% url 'home' %}">Back to My Topics</a>
+<div class="container">
 
-<form method="post" action="{% url 'topic_delete' topic.pk %}" style="display:inline;">
-  {% csrf_token %}
-  <button type="submit" onclick="return confirm('Delete this topic?')">Delete</button>
-</form>
+  <!-- Topic header card -->
+  <div class="card">
+    <div class="topic-header">
+      <div>
+        <h1>{{ topic.name }}</h1>
+        <span class="badge badge-{{ topic.status }}">{{ topic.get_status_display }}</span>
+      </div>
+      <div class="topic-actions">
+        <a href="{% url 'topic_edit' topic.pk %}" class="btn btn-secondary btn-sm">Edit</a>
+        <form method="post" action="{% url 'topic_delete' topic.pk %}" style="display:inline;">
+          {% csrf_token %}
+          <button type="submit" class="btn btn-danger btn-sm"
+                  onclick="return confirm('Delete this topic and all its notes?')">Delete</button>
+        </form>
+      </div>
+    </div>
+
+    {% if topic.description %}
+      <p class="topic-description">{{ topic.description }}</p>
+    {% endif %}
+
+    <!-- Tags -->
+    <div style="margin-top:1rem;border-top:1px solid #f1f5f9;padding-top:1rem;">
+      <div style="font-size:0.75rem;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;color:#94a3b8;margin-bottom:0.5rem;">Tags</div>
+      <div class="tag-cloud">
+        {% for tag in topic.tags.all %}
+          <span class="tag-chip">
+            <a href="{% url 'tag_detail' tag.pk %}">{{ tag.name }}</a>
+            <form method="post" action="{% url 'topic_remove_tag' topic.pk tag.pk %}" style="display:inline;line-height:1;">
+              {% csrf_token %}
+              <button type="submit" class="tag-chip-remove" title="Remove tag">×</button>
+            </form>
+          </span>
+        {% empty %}
+          <span style="color:#94a3b8;font-size:0.875rem;">No tags yet.</span>
+        {% endfor %}
+      </div>
+      <form method="post" action="{% url 'topic_add_tag' topic.pk %}" class="add-tag-form">
+        {% csrf_token %}
+        <input type="text" name="name" placeholder="Add a tag…" maxlength="50" autocomplete="off">
+        <button type="submit" class="btn btn-sm" style="background:#7c3aed;color:white;">Add</button>
+      </form>
+    </div>
+
+    <a href="{% url 'topic_index' %}" class="btn btn-secondary btn-sm" style="margin-top:1.25rem;">← My Topics</a>
+  </div>
+
+  <!-- Notes section -->
+  <div class="section-divider">
+    <h2>Progress Notes</h2>
+    <span style="color:#94a3b8;font-size:0.85rem;">{{ topic.notes.count }} note{{ topic.notes.count|pluralize }}</span>
+  </div>
+
+  {% for note in topic.notes.all %}
+    <div class="note-card">
+      <div class="note-meta">{{ note.date|date:"F j, Y" }}</div>
+      <p class="note-content">{{ note.content }}</p>
+      {% if note.reference %}
+        <div class="note-reference-label">Reference</div>
+        <div class="note-reference">{{ note.reference }}</div>
+      {% endif %}
+      <div class="note-actions">
+        <a href="{% url 'note_edit' note.pk %}" class="btn btn-secondary btn-sm">Edit</a>
+        <form method="post" action="{% url 'note_delete' note.pk %}" style="display:inline;">
+          {% csrf_token %}
+          <button type="submit" class="btn btn-danger btn-sm"
+                  onclick="return confirm('Delete this note?')">Delete</button>
+        </form>
+      </div>
+    </div>
+  {% empty %}
+    <p style="color:#94a3b8;margin-bottom:1.5rem;">No notes yet — log your first session below.</p>
+  {% endfor %}
+
+  <!-- Add note form -->
+  <div class="add-note-box">
+    <h3>Log a Session</h3>
+    <form method="post" action="{% url 'note_add' topic.pk %}">
+      {% csrf_token %}
+      {{ note_form.as_p }}
+      <button type="submit" class="btn btn-success">Save Note</button>
+    </form>
+  </div>
+
+</div>
 {% endblock %}

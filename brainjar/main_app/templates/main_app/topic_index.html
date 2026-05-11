@@ -1,16 +1,33 @@
 {% extends 'main_app/base.html' %}
 
 {% block content %}
-<h1>My Topics</h1>
-{% if topics %}
-  <ul>
-    {% for topic in topics %}
-      <li>
-        <a href="{% url 'topic_detail' topic.pk %}">{{ topic.name }}</a> — {{ topic.get_status_display }}
-      </li>
-    {% endfor %}
-  </ul>
-{% else %}
-  <p>No topics yet. <a href="{% url 'topic_create' %}">Add one!</a></p>
-{% endif %}
+<div class="container">
+  <div class="action-row">
+    <h1 class="page-title" style="margin:0;">My Topics</h1>
+    <a href="{% url 'topic_create' %}" class="btn btn-primary">+ New Topic</a>
+  </div>
+
+  {% if topics %}
+    <ul class="topic-list">
+      {% for topic in topics %}
+        <li class="topic-item">
+          <a href="{% url 'topic_detail' topic.pk %}">{{ topic.name }}</a>
+          <div style="display:flex;align-items:center;gap:0.75rem;">
+            <div class="tag-cloud" style="margin:0;">
+              {% for tag in topic.tags.all %}
+                <a href="{% url 'tag_detail' tag.pk %}" class="tag-chip" style="font-size:0.75rem;padding:0.2rem 0.6rem;">{{ tag.name }}</a>
+              {% endfor %}
+            </div>
+            <span class="badge badge-{{ topic.status }}">{{ topic.get_status_display }}</span>
+          </div>
+        </li>
+      {% endfor %}
+    </ul>
+  {% else %}
+    <div class="empty-state">
+      <p>No topics yet — add something you want to learn!</p>
+      <a href="{% url 'topic_create' %}" class="btn btn-primary">Create your first topic</a>
+    </div>
+  {% endif %}
+</div>
 {% endblock %}
