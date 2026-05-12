@@ -1,1 +1,1 @@
-web: gunicorn brainjar.wsgi
+web: gunicorn --pyhtonpath brainjar brainjar.wsgi
