@@ -42,8 +42,14 @@
       </div>
       <form method="post" action="{% url 'topic_add_tag' topic.pk %}" class="add-tag-form">
         {% csrf_token %}
-        <input type="text" name="name" placeholder="Add a tag…" maxlength="50" autocomplete="off">
-        <button type="submit" class="btn btn-sm" style="background:#7c3aed;color:white;">Add</button>
+        <input type="text" name="name" placeholder="Add a tag…" maxlength="50"
+               list="existing-tags-list" autocomplete="off">
+        <datalist id="existing-tags-list">
+          {% for tag in existing_tags %}
+            <option value="{{ tag.name }}">
+          {% endfor %}
+        </datalist>
+        <button type="submit" class="btn btn-primary btn-sm">Add</button>
       </form>
     </div>
 

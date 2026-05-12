@@ -1,7 +1,7 @@
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.models import User
 from django import forms
-from .models import Topic, Note
+from .models import Topic, Note, Tag
 
 
 class SignupForm(UserCreationForm):
@@ -18,8 +18,14 @@ class TopicForm(forms.ModelForm):
         fields = ('name', 'description', 'status')
 
 
+class TagForm(forms.ModelForm):
+    class Meta:
+        model = Tag
+        fields = ('name',)
+
+
 class NoteForm(forms.ModelForm):
-    date = forms.DateField(widget=forms.SelectDateWidget(years=range(2020, 2030)))
+    date = forms.DateField(widget=forms.SelectDateWidget(years=range(1990, 2030)))
 
     class Meta:
         model = Note

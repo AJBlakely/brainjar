@@ -2,7 +2,7 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth import login, logout, authenticate
 from django.contrib.auth.decorators import login_required
 from django.db.models import Count
-from .forms import SignupForm, TopicForm, NoteForm
+from .forms import SignupForm, TopicForm, NoteForm, TagForm
 from .models import Topic, Note, Tag
 
 
@@ -63,7 +63,12 @@ def topic_create(request):
 def topic_detail(request, pk):
     topic = get_object_or_404(Topic, pk=pk, user=request.user)
     note_form = NoteForm()
-    return render(request, 'main_app/topic_detail.html', {'topic': topic, 'note_form': note_form})
+    existing_tags = request.user.tags.exclude(pk__in=topic.tags.all())
+    return render(request, 'main_app/topic_detail.html', {
+        'topic': topic,
+        'note_form': note_form,
+        'existing_tags': existing_tags,
+    })
 
 
 @login_required
@@ -106,6 +111,19 @@ def topic_remove_tag(request, topic_pk, tag_pk):
     if request.method == 'POST':
         topic.tags.remove(tag)
     return redirect('topic_detail', pk=topic_pk)
+
+
+@login_required
+def tag_create(request):
+    if request.method == 'POST':
+        form = TagForm(request.POST)
+        if form.is_valid():
+            name = form.cleaned_data['name'].strip().lower()
+            Tag.objects.get_or_create(user=request.user, name=name)
+            return redirect('tag_index')
+    else:
+        form = TagForm()
+    return render(request, 'main_app/tag_create.html', {'form': form})
 
 
 @login_required
